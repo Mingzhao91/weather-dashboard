@@ -53,7 +53,7 @@ function showWeather(weather) {
 }
 
 // get geographical cooridnates of city and the weather forecast
-async function onSearchButtonClick(event) {
+async function getWeather(event) {
   event.preventDefault();
   // get city from user input
   const city = $("#search-input").val();
@@ -90,12 +90,23 @@ async function onSearchButtonClick(event) {
   }
 }
 
-$("#search-button").on("click", onSearchButtonClick);
+async function onCityBtnClick(event) {
+  event.preventDefault();
+  // get city from the button data attribute
+  const city = $(event.target).attr("data-city");
+  // put the city in the search input
+  $("#search-input").val(city);
+
+  //
+  await getWeather(event);
+}
+
+$("#search-button").on("click", getWeather);
+$("#history").on("click", ".city-btn", onCityBtnClick);
 
 // get cities that are stored from local storage and show them to the DOM
 function populateCityHistory() {
   const citysArr = getCitysFromLocalStorage();
-  console.log("citysArr: ", citysArr);
 
   // clear previous citys in the DOM
   $("#history").empty();
@@ -103,8 +114,9 @@ function populateCityHistory() {
   // build a list of citys and show to the DOM
   if (citysArr && citysArr.length > 0) {
     citysArr.forEach(function (city) {
-      const cityTab = $('<button class="btn btn-secondary mb-2">');
+      const cityTab = $('<button class="btn btn-secondary mb-2 city-btn">');
       cityTab.text(city);
+      cityTab.attr("data-city", city);
       $("#history").append(cityTab);
     });
   }
