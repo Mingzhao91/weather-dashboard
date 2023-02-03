@@ -12,7 +12,7 @@
   <link rel="stylesheet"
         href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
   <link rel="stylesheet"
-        href="styles/reset.css" />
+        href="./assets/css/style.css" />
   <title>Weather Dashboard</title>
 </head>
 
@@ -27,22 +27,22 @@
     <div class="row">
       <aside class="col-lg-3 pb-3">
         <h2 id="form-heading"
-            class="mt-1 h3 form-label">
+            class="mt-1 h2 form-label search-city">
           Search for a City:
         </h2>
         <form id="search-form"
-              class="form">
-          <div class="form-inline form-group">
-            <div class="input-group">
-              <input class="form-input weather-search"
+              class="form mb-2">
+          <div class="form-group">
+            <div class="input-group d-flex flex-column">
+              <input class="form-input form-control weather-search"
                      type="text"
                      id="search-input"
                      placeholder="London"
                      aria-labelledby="form-heading"
                      aria-controls="today forecast" />
-              <div class="input-group-append">
+              <div class="input-group-append mt-2">
                 <button type="submit"
-                        class="btn search-button"
+                        class="btn btn-primary search-button"
                         id="search-button"
                         aria-label="submit search">
                   Search

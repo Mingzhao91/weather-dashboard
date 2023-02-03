@@ -1,0 +1,18 @@
+.weather-header {
+  background-image: linear-gradient(to right, #3362ba, #200b4e);
+}
+
+.search-city {
+  font-weight: 700;
+  font-size: 28px;
+}
+
+.weather-search,
+.search-button {
+  width: 100% !important;
+}
+
+#history {
+  border-top: 1px solid #cdcdcd;
+  padding-top: 20px;
+}
