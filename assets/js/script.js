@@ -64,7 +64,10 @@ async function onSearchButtonClick(event) {
     if (geolocationResp && geolocationResp.length > 0) {
       // get the first result from the array as the location
       const location = geolocationResp[0];
-      const locationName = location.name;
+      const city = location.name;
+      saveCityToLocalStorage(city);
+    } else {
+      // TODO: show popup to say city can't be found
     }
   }
 }
