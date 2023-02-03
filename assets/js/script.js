@@ -47,6 +47,11 @@ function saveCityToLocalStorage(city) {
   localStorage.setItem(APP_ID, JSON.stringify(citysArr));
 }
 
+// show weather in DOM
+function showWeather(weather) {
+  console.log("weather: ", weather);
+}
+
 // get geographical cooridnates of city and the weather forecast
 async function onSearchButtonClick(event) {
   event.preventDefault();
@@ -66,6 +71,18 @@ async function onSearchButtonClick(event) {
       const location = geolocationResp[0];
       const city = location.name;
       saveCityToLocalStorage(city);
+
+      // get weather for the city
+      const weather = await $.ajax({
+        method: "GET",
+        url: getWeatherForecastUrl(location.lat, location.lon)
+      });
+
+      if (weather) {
+        showWeather(weather);
+      } else {
+        // TODO: show popup to say weather can't be found
+      }
     } else {
       // TODO: show popup to say city can't be found
     }
