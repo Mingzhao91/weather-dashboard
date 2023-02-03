@@ -1,3 +1,4 @@
+const APP_ID = "weather-dashboard";
 const API_KEY = "6a1575051b1bc2d3c0c021d12e30be02";
 
 // get the geocoding url by providing the city
@@ -15,6 +16,37 @@ function getWeatherIconUrl(weatherIcon) {
   return `http://openweathermap.org/img/wn/${weatherIcon}@2x.png`;
 }
 
+// get citys from local storage
+function getCitysFromLocalStorage() {
+  // get local storage, if it's null then create a new object
+  let citysArr = localStorage.getItem(APP_ID)
+    ? JSON.parse(localStorage.getItem(APP_ID))
+    : [];
+  return citysArr;
+}
+
+// save a city to local storage
+function saveCityToLocalStorage(city) {
+  // get local storage, if it's null then create a new object
+  let citysArr = localStorage.getItem(APP_ID)
+    ? JSON.parse(localStorage.getItem(APP_ID))
+    : [];
+
+  const cityIndex = citysArr.indexOf(city);
+
+  if (cityIndex < 0) {
+    // city isn't in the array, append city to the front of the array
+    citysArr.unshift(city);
+  } else if (cityIndex > 0) {
+    // city is in the array, bring it to the front of the array
+    citysArr.splice(cityIndex, 1);
+    citysArr.unshift(city);
+  }
+
+  // save an event into local storage
+  localStorage.setItem(APP_ID, JSON.stringify(citysArr));
+}
+
 // get geographical cooridnates of city and the weather forecast
 async function onSearchButtonClick(event) {
   event.preventDefault();
@@ -27,16 +59,12 @@ async function onSearchButtonClick(event) {
       method: "GET",
       url: getLocationUrl(city)
     });
-    console.log("geolocationResp: ", geolocationResp);
 
     // store location and get weather based on the location
     if (geolocationResp && geolocationResp.length > 0) {
       // get the first result from the array as the location
       const location = geolocationResp[0];
       const locationName = location.name;
-
-      console.log("location: ", location);
-      console.log("locationName: ", locationName);
     }
   }
 }
