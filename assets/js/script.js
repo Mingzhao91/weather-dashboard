@@ -71,6 +71,7 @@ async function onSearchButtonClick(event) {
       const location = geolocationResp[0];
       const city = location.name;
       saveCityToLocalStorage(city);
+      populateCityHistory();
 
       // get weather for the city
       const weather = await $.ajax({
