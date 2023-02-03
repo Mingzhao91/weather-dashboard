@@ -15,23 +15,44 @@ function getWeatherIconUrl(weatherIcon) {
   return `http://openweathermap.org/img/wn/${weatherIcon}@2x.png`;
 }
 
-$.ajax({
-  method: "GET",
-  url: getLocationUrl("london")
-}).then((resp) => {
-  console.log("london", resp);
-});
+// get geographical cooridnates of city and the weather forecast
+async function onSearchButtonClick(event) {
+  event.preventDefault();
+  // get city from user input
+  const city = $("#search-input").val();
 
-$.ajax({
-  method: "GET",
-  url: getWeatherForecastUrl(51.5073219, -0.1276474)
-}).then((resp) => {
-  console.log("weather", resp);
-});
+  // make API call only if city isn't empty
+  if (city.trim().length > 0) {
+    const geolocationResp = await $.ajax({
+      method: "GET",
+      url: getLocationUrl(city)
+    });
+    console.log("geolocationResp: ", geolocationResp);
 
-$.ajax({
-  method: "GET",
-  url: `http://api.openweathermap.org/data/2.5/forecast?q=${"london"}&appid=${API_KEY}`
-}).then((resp) => {
-  console.log("MIX", resp);
-});
+    // store location and get weather based on the location
+    if (geolocationResp && geolocationResp.length > 0) {
+      // get the first result from the array as the location
+      const location = geolocationResp[0];
+      const locationName = location.name;
+
+      console.log("location: ", location);
+      console.log("locationName: ", locationName);
+    }
+  }
+}
+
+$("#search-button").on("click", onSearchButtonClick);
+
+// $.ajax({
+//   method: "GET",
+//   url: getLocationUrl("london")
+// }).then((resp) => {
+//   console.log("london", resp);
+// });
+
+// $.ajax({
+//   method: "GET",
+//   url: getWeatherForecastUrl(51.5073219, -0.1276474)
+// }).then((resp) => {
+//   console.log("weather", resp);
+// });
