@@ -91,6 +91,31 @@ async function onSearchButtonClick(event) {
 
 $("#search-button").on("click", onSearchButtonClick);
 
+// get cities that are stored from local storage and show them to the DOM
+function populateCityHistory() {
+  const citysArr = getCitysFromLocalStorage();
+  console.log("citysArr: ", citysArr);
+
+  // clear previous citys in the DOM
+  $("#history").empty();
+
+  // build a list of citys and show to the DOM
+  if (citysArr && citysArr.length > 0) {
+    citysArr.forEach(function (city) {
+      const cityTab = $('<button class="btn btn-secondary mb-2">');
+      cityTab.text(city);
+      $("#history").append(cityTab);
+    });
+  }
+}
+
+// function to run when app get started
+function start() {
+  populateCityHistory();
+}
+
+start();
+
 // $.ajax({
 //   method: "GET",
 //   url: getLocationUrl("london")
