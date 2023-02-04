@@ -7,8 +7,12 @@ function getLocationUrl(city, apiKey = API_KEY) {
 }
 
 // get the 5-days weather forcast url by providing the latitude and the longitude
-function getWeatherForecastUrl(lat, lon, apiKey = API_KEY) {
+function get5DaysWeatherForecastUrl(lat, lon, apiKey = API_KEY) {
   return `http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+}
+
+function getCurrentWeatherForecastUrl(lat, lon, apiKey = API_KEY) {
+  return `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
 }
 
 // get weather png using icon code from https://openweathermap.org/weather-conditions
@@ -47,9 +51,110 @@ function saveCityToLocalStorage(city) {
   localStorage.setItem(APP_ID, JSON.stringify(citysArr));
 }
 
+function convertKelvinToCelsicus(kelvin) {
+  return (kelvin - 273.15).toFixed(2);
+}
+
+function convertMeterPerSecToKiloMeterPerHour(meterPerSec) {
+  return (meterPerSec * 3.6).toFixed(2);
+}
+
+// build the element for today weather and put it into the DOM
+function showTodayWeather(resp) {
+  const todayEl$ = $("#today");
+
+  // clear previous result
+  todayEl$.empty();
+  // add class to today div
+  todayEl$.addClass("today--show");
+
+  // 1 kelvin = -273.15 degree celsicus
+  // 1 meter per second = 3.6 kilometer per hour
+
+  // insert weather information in the DOM
+  todayEl$.html(`
+    <div class="today-header d-flex align-items-center">
+      <h2 class="today-city">${resp.name} (${moment().format("DD/M/YYYY")})</h2>
+      <img src="${getWeatherIconUrl(resp.weather[0].icon)}" />
+    </div>
+    <div class="today-body">
+      <p class="today-body__item">Temp: ${convertKelvinToCelsicus(
+        resp.main.temp
+      )} &#8451;</p> 
+      <p class="today-body__item">Wind: ${convertMeterPerSecToKiloMeterPerHour(
+        resp.wind.speed
+      )} KPH</p>
+      <p class="today-body__item">Humidity: ${resp.main.humidity}%</p>
+    </div>
+`);
+}
+
+// build the element for weather in 5 days and put it into the DOM
+function show5DaysWeather(resp) {
+  const forecastEl = $("#forecast");
+  // clear previous result
+  forecastEl.empty();
+
+  // get tomorrow date
+  const tomorrowDate = moment().add("days", 1).startOf("day");
+
+  // setup header and body element in forecast div
+  const forecastHeaderEl = $('<div class="forecast-header">');
+  forecastHeaderEl.text("5-Day Forecast:");
+  const forecastBodyEl = $('<div class="forecast-body">');
+
+  for (let day = 0; day < 5; day++) {
+    const startDate = moment(tomorrowDate).add("days", day);
+    const endDate = moment(tomorrowDate).add("days", day + 1);
+
+    // get weather for each day
+    const weatherPerDayArr = resp.list.filter(
+      (weather) =>
+        moment.unix(weather.dt) >= startDate &&
+        moment.unix(weather.dt) < endDate
+    );
+    // console.log("weatherPerDayArr: ", weatherPerDayArr);
+
+    // get average temperature
+    const avgTemp = `${convertKelvinToCelsicus(
+      weatherPerDayArr.reduce((prev, curr) => prev + curr.main.temp, 0) /
+        weatherPerDayArr.length
+    )}`;
+
+    // get average wind speed
+    const avgWind = `${convertMeterPerSecToKiloMeterPerHour(
+      weatherPerDayArr.reduce((prev, curr) => prev + curr.wind.speed, 0) /
+        weatherPerDayArr.length
+    )}`;
+
+    // get average humidity
+    const avgHumidity = `${(
+      weatherPerDayArr.reduce((prev, curr) => prev + curr.main.humidity, 0) /
+      weatherPerDayArr.length
+    ).toFixed(0)}`;
+
+    const cardEl = $('<div class="forecast-card">');
+    cardEl.html(`      
+      <h3 class="forecast-card__date">${startDate.format("DD/M/YYYY")}</h3>
+      <img src="${getWeatherIconUrl(
+        weatherPerDayArr[0].weather[0].icon
+      )}" class="forecast-card__img"></img>
+      <div class="forecast-card__item">Temp: ${avgTemp} &#8451;</div>
+      <div class="forecast-card__item">Wind: ${avgWind} KPH</div>
+      <div class="forecast-card__item">Humidity: ${avgHumidity}%</div>
+    `);
+    forecastBodyEl.append(cardEl);
+  }
+
+  forecastEl.append(forecastHeaderEl);
+  forecastEl.append(forecastBodyEl);
+}
+
 // show weather in DOM
-function showWeather(weather) {
-  console.log("weather: ", weather);
+function showWeather(weatherResp) {
+  console.log("weatherResp: ", weatherResp);
+  showTodayWeather(weatherResp);
+  show5DaysWeather(weatherResp);
 }
 
 // get geographical cooridnates of city and the weather forecast
@@ -73,17 +178,19 @@ async function getWeather(event) {
       saveCityToLocalStorage(city);
       populateCityHistory();
 
-      // get weather for the city
-      const weather = await $.ajax({
+      // get 5-days weather for the city
+      const weatherCurrentResp = await $.ajax({
         method: "GET",
-        url: getWeatherForecastUrl(location.lat, location.lon)
+        url: getCurrentWeatherForecastUrl(location.lat, location.lon)
       });
+      showTodayWeather(weatherCurrentResp);
 
-      if (weather) {
-        showWeather(weather);
-      } else {
-        // TODO: show popup to say weather can't be found
-      }
+      // get 5-days weather for the city
+      const weather5DaysResp = await $.ajax({
+        method: "GET",
+        url: get5DaysWeatherForecastUrl(location.lat, location.lon)
+      });
+      show5DaysWeather(weather5DaysResp);
     } else {
       // TODO: show popup to say city can't be found
     }
@@ -128,17 +235,3 @@ function start() {
 }
 
 start();
-
-// $.ajax({
-//   method: "GET",
-//   url: getLocationUrl("london")
-// }).then((resp) => {
-//   console.log("london", resp);
-// });
-
-// $.ajax({
-//   method: "GET",
-//   url: getWeatherForecastUrl(51.5073219, -0.1276474)
-// }).then((resp) => {
-//   console.log("weather", resp);
-// });
