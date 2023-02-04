@@ -200,8 +200,9 @@ async function onCityBtnClick(event) {
   const city = $(event.target).attr("data-city");
   // put the city in the search input
   $("#search-input").val(city);
-
-  //
+  // hide popover for empty search field if it's still showing
+  hideInputPopover();
+  // get weather for the selected city
   await getWeather(event);
 }
 
