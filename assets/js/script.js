@@ -3,21 +3,21 @@ const API_KEY = "6a1575051b1bc2d3c0c021d12e30be02";
 
 // get the geocoding url by providing the city
 function getLocationUrl(city, apiKey = API_KEY) {
-  return `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`;
+  return `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`;
 }
 
 // get the 5-days weather forcast url by providing the latitude and the longitude
 function get5DaysWeatherForecastUrl(lat, lon, apiKey = API_KEY) {
-  return `http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+  return `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}`;
 }
 
 function getCurrentWeatherForecastUrl(lat, lon, apiKey = API_KEY) {
-  return `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+  return `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
 }
 
 // get weather png using icon code from https://openweathermap.org/weather-conditions
 function getWeatherIconUrl(weatherIcon) {
-  return `http://openweathermap.org/img/wn/${weatherIcon}@2x.png`;
+  return `https://openweathermap.org/img/wn/${weatherIcon}@2x.png`;
 }
 
 // get citys from local storage
