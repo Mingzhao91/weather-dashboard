@@ -60,7 +60,7 @@ function convertMeterPerSecToKiloMeterPerHour(meterPerSec) {
 }
 
 // build the element for today weather and put it into the DOM
-function showTodayWeather(resp) {
+function showTodayWeather(resp, city) {
   const todayEl$ = $("#today");
 
   // clear previous result
@@ -74,7 +74,7 @@ function showTodayWeather(resp) {
   // insert weather information in the DOM
   todayEl$.html(`
     <div class="today-header d-flex align-items-center">
-      <h2 class="today-city">${resp.name} (${moment().format("DD/M/YYYY")})</h2>
+      <h2 class="today-city">${city} (${moment().format("DD/M/YYYY")})</h2>
       <img src="${getWeatherIconUrl(resp.weather[0].icon)}" />
     </div>
     <div class="today-body">
@@ -150,13 +150,6 @@ function show5DaysWeather(resp) {
   forecastEl.append(forecastBodyEl);
 }
 
-// show weather in DOM
-function showWeather(weatherResp) {
-  console.log("weatherResp: ", weatherResp);
-  showTodayWeather(weatherResp);
-  show5DaysWeather(weatherResp);
-}
-
 // get geographical cooridnates of city and the weather forecast
 async function getWeather(event) {
   event.preventDefault();
@@ -178,12 +171,12 @@ async function getWeather(event) {
       saveCityToLocalStorage(city);
       populateCityHistory();
 
-      // get 5-days weather for the city
+      // get current day weather for the city
       const weatherCurrentResp = await $.ajax({
         method: "GET",
         url: getCurrentWeatherForecastUrl(location.lat, location.lon)
       });
-      showTodayWeather(weatherCurrentResp);
+      showTodayWeather(weatherCurrentResp, city);
 
       // get 5-days weather for the city
       const weather5DaysResp = await $.ajax({
@@ -192,8 +185,12 @@ async function getWeather(event) {
       });
       show5DaysWeather(weather5DaysResp);
     } else {
-      // TODO: show popup to say city can't be found
+      // update text in model
+      $("#city-modal-body").text(`${city} can't be found! Please try again.`);
+      $("#city-modal").modal("show");
     }
+  } else {
+    showInputPopover();
   }
 }
 
@@ -208,6 +205,7 @@ async function onCityBtnClick(event) {
   await getWeather(event);
 }
 
+$("#search-input").on("focus", hideInputPopover);
 $("#search-button").on("click", getWeather);
 $("#history").on("click", ".city-btn", onCityBtnClick);
 
@@ -229,8 +227,28 @@ function populateCityHistory() {
   }
 }
 
+// initialise popover
+function initPopover() {
+  $(function () {
+    $('[data-toggle="popover"]').popover();
+  });
+}
+
+// show input popover if search field is empty but search button is clicked
+function showInputPopover() {
+  $("#search-input").popover("enable");
+  $("#search-input").popover("show");
+}
+
+// hide popover
+function hideInputPopover() {
+  $("#search-input").popover("disable");
+  $("#search-input").popover("hide");
+}
+
 // function to run when app get started
 function start() {
+  initPopover();
   populateCityHistory();
 }
 
